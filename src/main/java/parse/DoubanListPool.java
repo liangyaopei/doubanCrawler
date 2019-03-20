@@ -29,6 +29,7 @@ public class DoubanListPool {
      */
     private int interval;
     private int offsetMax;
+    private CountDownLatch latch;
 
     public DoubanListPool(int numThreads,
                           String startDate, String endDate,
@@ -44,10 +45,27 @@ public class DoubanListPool {
         this.offsetMax = 700;
     }
 
+    public DoubanListPool(int numThreads,
+                          String startDate, String endDate,
+                          String baseURL, String destDir,
+                          String city, int interval, int offsetMax,
+                          CountDownLatch latch) {
+        this.numThreads = numThreads;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.baseURL = baseURL;
+        this.destDir = destDir;
+        this.city = city;
+        this.interval = interval;
+        this.offsetMax = offsetMax;
+        this.latch = latch;
+    }
+
     public void run(){
 
         if(numThreads!=1)
             numThreads = Runtime.getRuntime().availableProcessors();
+       // System.out.println("numThread:"+numThreads);
 
         ExecutorService executor = Executors.newFixedThreadPool(numThreads);
         /**
@@ -63,6 +81,7 @@ public class DoubanListPool {
         try{
             for(int i=0;i<numThreads;++i){
                 String dest = destDir + city + i +".txt";
+
                 DoubanListTask task = new DoubanListTask(baseURL,dates,
                         startIndex,endIndex,offsetMax,
                         dest,endController,
@@ -82,7 +101,8 @@ public class DoubanListPool {
         }catch (InterruptedException e){
             e.printStackTrace();
         }
-
+        if(latch != null)
+            latch.countDown();
         //close the pool
        // pool.shutdown();
     }

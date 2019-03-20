@@ -19,7 +19,7 @@ public class DoubanListParser {
     private String baseURL;
     private boolean getDetails;
     private boolean getParticipants;
-    private int sleepInterval = 500;
+    private int sleepInterval = 200;
 
     public DoubanListParser(String baseURL, boolean parseDetails, boolean parseParticipants) {
         this.baseURL = baseURL;
@@ -40,18 +40,15 @@ public class DoubanListParser {
      * @return
      * @throws IOException
      */
-    public Set<EventInformation> parse() throws IOException, InterruptedException {
+    public Set<EventInformation> parse() throws  InterruptedException {
         Set<EventInformation> res = new HashSet<>();
 
-        /**
-         * use cookie to gain access to item
-         */
-        Document document = crawlContent(baseURL);
-
-        Elements events = document
+        try{
+            Document document = crawlContent(baseURL);
+            Elements events = document
                     .select("ul.events-list.events-list-pic100.events-list-psmall")
                     .select("li.list-entry");
-        for(Element element:events){
+            for(Element element:events){
                 EventInformation event = new EventInformation();
                 String detailsURL = parseDetailsURL(element);
                 String id = parseId(detailsURL);
@@ -66,9 +63,9 @@ public class DoubanListParser {
 
 
                 if(getDetails == true){
-                   // Thread.sleep(sleepInterval);
+                    Thread.sleep(sleepInterval);
                     String details = parseDetails(detailsURL);
-                  //  System.out.println("detailURL:"+detailsURL);
+                    //  System.out.println("detailURL:"+detailsURL);
 
                     //System.out.println("detail:"+details);
 
@@ -83,9 +80,12 @@ public class DoubanListParser {
                 }
 
                 res.add(event);
-        }
+            }
 
-        Thread.sleep(sleepInterval);
+        }catch (IOException e){
+            e.printStackTrace();
+        }
+       // Thread.sleep(sleepInterval);
         return res;
     }
 
