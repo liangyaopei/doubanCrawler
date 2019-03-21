@@ -63,9 +63,10 @@ public class DownLoadTaskPool {
                 executor.execute(task);
             }
 
+            executor.shutdown();
             endController.await();
 
-        }catch (InterruptedException e){
+        }catch (Exception e){
             e.printStackTrace();
         }
     }

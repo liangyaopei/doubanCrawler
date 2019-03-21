@@ -42,7 +42,7 @@ public class DownloadTask implements Runnable {
                 String eventURL = baseURL +range.get(index);
                 String participantsURl = eventURL + "/participants";
 
-                System.out.println("before download, eventURL:"+eventURL);
+
                 Downloader downloader = new Downloader(eventURL,participantsURl);
                 String data = downloader.download();
 
@@ -51,7 +51,7 @@ public class DownloadTask implements Runnable {
                     writer.write(data);
                     writer.write("\n");
                     writer.flush();
-                   System.out.println("after eventURL:"+eventURL);
+                    System.out.println("after eventURL:"+eventURL);
                     if(index % 100 ==0){
                         System.out.println("eventURL:"+eventURL);
                     }
@@ -60,9 +60,8 @@ public class DownloadTask implements Runnable {
 
         }catch (IOException e){
             e.printStackTrace();
-        }finally {
-            endController.countDown();
         }
+        endController.countDown();
 
     }
 }
