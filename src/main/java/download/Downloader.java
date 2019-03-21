@@ -25,8 +25,8 @@ public class Downloader {
         try{
             String eventData = Jsoup
                     .connect(eventURL)
-                  //  .header(DoubanProxySetting.ProxyHeadKey,DoubanProxySetting.ProxyHeadVal)
-                  //  .proxy(DoubanProxySetting.getProxy())
+                    .header(DoubanProxySetting.ProxyHeadKey,DoubanProxySetting.ProxyHeadVal)
+                    .proxy(DoubanProxySetting.getProxy())
                     .ignoreContentType(true)
                     .execute().body();
             DoubanEventJsonFormat event = parseEvent(eventData);
@@ -36,8 +36,8 @@ public class Downloader {
             }else{
                 String participantsData = Jsoup
                         .connect(participantURL)
-                      //  .header(DoubanProxySetting.ProxyHeadKey,DoubanProxySetting.ProxyHeadVal)
-                       // .proxy(DoubanProxySetting.getProxy())
+                        .header(DoubanProxySetting.ProxyHeadKey,DoubanProxySetting.ProxyHeadVal)
+                        .proxy(DoubanProxySetting.getProxy())
                         .ignoreContentType(true)
                         .execute().body();
                 DoubanEventParticipantJsonFormat participants = parseParticipants(participantsData);
