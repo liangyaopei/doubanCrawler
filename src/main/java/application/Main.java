@@ -21,7 +21,7 @@ public class Main {
         if(args.length == 0){
              start = 30_000_000;
              end = 32_000_000;
-             numThreads = Runtime.getRuntime().availableProcessors();
+             numThreads = Runtime.getRuntime().availableProcessors()/4;
             //start = 31754698;
             //end = 31754798;
             //numThreads = 1;

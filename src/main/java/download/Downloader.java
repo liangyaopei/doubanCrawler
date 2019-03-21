@@ -25,6 +25,7 @@ public class Downloader {
         try{
             String eventData = Jsoup
                     .connect(eventURL)
+                    .timeout(3000)
                     .header(DoubanProxySetting.ProxyHeadKey,DoubanProxySetting.ProxyHeadVal)
                     .proxy(DoubanProxySetting.getProxy())
                     .ignoreContentType(true)
@@ -36,6 +37,7 @@ public class Downloader {
             }else{
                 String participantsData = Jsoup
                         .connect(participantURL)
+                        .timeout(3000)
                         .header(DoubanProxySetting.ProxyHeadKey,DoubanProxySetting.ProxyHeadVal)
                         .proxy(DoubanProxySetting.getProxy())
                         .ignoreContentType(true)
