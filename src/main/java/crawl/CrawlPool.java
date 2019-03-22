@@ -33,6 +33,9 @@ public class CrawlPool {
      * second for loop:
      */
     public void execute() {
+        /**
+         * use numThreads to crawl data
+         */
         ExecutorService service = Executors.newFixedThreadPool(numThreads);
 
 
@@ -60,8 +63,10 @@ public class CrawlPool {
             int beginIndex = 0, lastIndex = length;
 
 
-
-            for(int i=0 ;i<numThreads; i++){
+            /**
+             * only 1 thread to store data.
+             */
+            for(int i=0 ;i<1; i++){
                 String dest = destDir + "doubanJson" +i +".txt";
                 System.out.println(dest);
 

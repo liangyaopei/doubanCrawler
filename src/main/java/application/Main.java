@@ -22,7 +22,7 @@ public class Main {
         if(args.length == 0){
             // start = 30_000_000;
             // end = 32_000_000;
-             start = 12_002_207;
+             start = 12_003_827;
              end = 13_000_000;
              //numThreads = Runtime.getRuntime().availableProcessors();
             //start = 31754698;
