@@ -62,7 +62,7 @@ public class CrawlerStoreTask implements Runnable{
     private void storeData(int index,BufferedWriter writer)throws IOException,
             InterruptedException, ExecutionException {
         Future<String> future = futureEvent.get(index);
-        System.out.println(Thread.currentThread().getName()+" waiting for data");
+    //    System.out.println(Thread.currentThread().getName()+" waiting for data");
         String data = future.get();
         System.out.println(Thread.currentThread().getName()+" getting data");
         if(!data.isEmpty()){

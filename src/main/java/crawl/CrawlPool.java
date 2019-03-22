@@ -19,12 +19,16 @@ public class CrawlPool {
     private int start;
     private int end;
     private String destDir;
+    private int step=1;
 
-    public CrawlPool(int numThreads, String baseURL, int start, int end, String destDir) {
+    public CrawlPool(int numThreads, String baseURL,
+                     int start, int end, int step,
+                     String destDir) {
         this.numThreads = numThreads;
         this.baseURL = baseURL;
         this.start = start;
         this.end = end;
+        this.step = step;
         this.destDir = destDir;
     }
 
@@ -42,7 +46,7 @@ public class CrawlPool {
       //  List<Crawler> tasks = new ArrayList<>(end-start+1);
         List<Future<String>> results = new ArrayList<>(end-start +1);
 
-        for(int index= start; index<end;index++){
+        for(int index= start; index<end;index+=step){
             String eventURL = baseURL + index;
             String participantsURL = eventURL + "/" + "participants";
 
