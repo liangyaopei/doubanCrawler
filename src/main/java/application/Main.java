@@ -1,5 +1,6 @@
 package application;
 
+import crawl.CrawlPool;
 import download.DownLoadTaskPool;
 
 import java.io.File;
@@ -19,12 +20,14 @@ public class Main {
         int start,end,numThreads = 1;
 
         if(args.length == 0){
-             start = 30_000_000;
-             end = 32_000_000;
-             numThreads = Runtime.getRuntime().availableProcessors();
+            // start = 30_000_000;
+            // end = 32_000_000;
+             start = 12_002_207;
+             end = 13_000_000;
+             //numThreads = Runtime.getRuntime().availableProcessors();
             //start = 31754698;
             //end = 31754798;
-            //numThreads = 1;
+            numThreads = 2;
         }else if(args.length == 1){
             Scanner scanner = new Scanner(System.in);
             System.out.println("input start");
@@ -45,8 +48,16 @@ public class Main {
         if(!directory.exists())
             directory.mkdir();
 
+        CrawlPool pool = new CrawlPool(numThreads,
+                baseURL,start,end,destDir);
+        pool.execute();
+
+        /*
          DownLoadTaskPool pool = new DownLoadTaskPool(numThreads,
                 baseURL,start,end,destDir);
          pool.execute();
+         */
     }
+
+
 }
