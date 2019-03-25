@@ -17,17 +17,21 @@ public class Main {
         String baseURL = "https://api.douban.com/v2/event/";
         String destDir = "./douban/";
 
-        int start,end,numThreads = 1;
-
+        int start,end,numThreads = 1,step=13;
+        int[] starts = {21_002_062,29562434,12035997};
+        int[] ends ={22_000_000,32_000_000,13_000_000};
         if(args.length == 0){
             // start = 30_000_000;
             // end = 32_000_000;
-             start = 12_003_827;
-             end = 13_000_000;
+            // start = 12_005_689;
+            // end = 13_000_000;
+            start = 21_717_757;
+            end = 22_000_000;
+            step = 13;
              //numThreads = Runtime.getRuntime().availableProcessors();
             //start = 31754698;
             //end = 31754798;
-            numThreads = 2;
+            numThreads = 3;
         }else if(args.length == 1){
             Scanner scanner = new Scanner(System.in);
             System.out.println("input start");
@@ -48,8 +52,10 @@ public class Main {
         if(!directory.exists())
             directory.mkdir();
 
+
         CrawlPool pool = new CrawlPool(numThreads,
-                baseURL,start,end,destDir);
+                baseURL,start,end,step,
+                destDir);
         pool.execute();
 
         /*
