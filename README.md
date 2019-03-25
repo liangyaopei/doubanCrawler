@@ -1,6 +1,44 @@
 ## 爬虫基本思路
 
-下载 —> 解析
+1. 先爬取城市列表
+
+   ```
+   GET https://api.douban.com/v2/loc/list
+   ```
+
+   
+
+2. 根据城市列表，时间，类别，获得时间的list
+
+   例如：
+
+   ```
+   https://api.douban.com/v2/event/list?loc=108296&day_type=20170301&type=all
+   ```
+
+   
+
+3. 根据第2步的list获取id，根据id获取事件详情和参与者
+
+   ```
+   GET https://api.douban.com/v2/event/{id}so
+   ```
+
+   获取参与者
+
+   ```
+   GET https://api.douban.com/v2/event/{id}/participants
+   ```
+
+   
+
+
+
+
+
+
+
+
 
 
 

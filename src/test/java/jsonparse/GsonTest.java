@@ -48,8 +48,12 @@ public class GsonTest {
 
     @Test
     public void checkKeyValue() throws IOException{
-        String participantsURL = "https://api.douban.com/v2/event/31754598"+"/participants";
-        String data = getData(participantsURL);
+      //  String participantsURL = "https://api.douban.com/v2/event/31754598"+"/participants";
+       // String url = "https://api.douban.com/v2/event/list?loc=118282&districts=all&day=future&type=all&count=100";
+        //String url = "https://api.douban.com/v2/event/user_participated/40524069";
+        String url = "https://api.douban.com/v2/event/user_participated/3956041?start=100&count=100";
+
+        String data = getData(url);
         GsonBuilder builder = new GsonBuilder();
         Map<String,Object> map =builder.create().fromJson(data, HashMap.class);
         Iterator it = map.entrySet().iterator();
@@ -61,15 +65,29 @@ public class GsonTest {
     }
 
 
-    public String parse(String jsonLine) {
+    @Test
+    public void parse()throws IOException {
+       // String url = "https://api.douban.com/v2/event/list?loc=118282&day_type=week&type=all&start=800&count=20";
+       // String url = "https://api.douban.com/v2/event/list?loc=118282";
+        String url = "https://api.douban.com/v2/event/user_participated/3956041?start=100&count=100";
 
-        JsonElement jelement = new JsonParser().parse(jsonLine);
+        String data = getData(url);
+
+        JsonElement jelement = new JsonParser().parse(data);
         JsonObject  jobject = jelement.getAsJsonObject();
-        jobject = jobject.getAsJsonObject("data");
-        JsonArray jarray = jobject.getAsJsonArray("translations");
-        jobject = jarray.get(0).getAsJsonObject();
-        String result = jobject.get("translatedText").getAsString();
-        return result;
+       // jobject = jobject.getAsJsonObject("data");
+        JsonArray jarray = jobject.getAsJsonArray("events");
+        int count=1;
+        for(JsonElement element:jarray){
+            JsonObject object =element.getAsJsonObject();
+
+            System.out.println("count:"+(count++)+",title:"+object.get("title"));
+            System.out.println("adapt_url:"+object.get("adapt_url"));
+            System.out.println("time:"+object.get("time_str"));
+        }
+     //   jobject = jarray.get(0).getAsJsonObject();
+      //  String result = jobject.get("translatedText").getAsString();
+       // return result;
     }
 
 }
