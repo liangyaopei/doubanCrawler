@@ -16,7 +16,7 @@ import java.util.stream.Stream;
 /**
  * @Author LYaopei
  */
-public class MergerUtil {
+public class DataMergerUtil {
 
     private static List<Integer> merge(String path,MergerParser parser){
         List<Integer> result = null;

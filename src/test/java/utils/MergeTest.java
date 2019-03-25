@@ -35,7 +35,7 @@ public class MergeTest {
     @Test
     public void parseTxtEventIdtest(){
         String path = "./douban/txt/shenzhen3.txt";
-        List<Integer> eventId = MergerUtil.parseTxtEventId(path);
+        List<Integer> eventId = DataMergerUtil.parseTxtEventId(path);
         System.out.println("size:"+eventId.size());
         eventId.forEach(System.out::println);
     }
@@ -43,7 +43,7 @@ public class MergeTest {
     @Test
     public void parseTxtParticipantsIdtest(){
         String path = "./douban/txt/douban3.txt";
-        List<Integer> participantId = MergerUtil.parseTxtParticipantsId(path);
+        List<Integer> participantId = DataMergerUtil.parseTxtParticipantsId(path);
         System.out.println("size:"+participantId.size());
         participantId.forEach(System.out::println);
     }
@@ -51,7 +51,7 @@ public class MergeTest {
     @Test
     public void parseJsonParticipantsIdTest(){
         String path = "/Users/lyaopei/IdeaProjects/DoubanCrawler/doubanCrawler/douban/json/doubanJson0Mac.txt";
-        MergerUtil merger = new MergerUtil();
+        DataMergerUtil merger = new DataMergerUtil();
         List<Integer> list = merger.parseJsonParticipantsId(path);
         System.out.println(list.size());
         list.forEach(System.out::println);
@@ -60,7 +60,7 @@ public class MergeTest {
     @Test
     public void parseJsonEventIdTest(){
         String path = "/Users/lyaopei/IdeaProjects/DoubanCrawler/doubanCrawler/douban/json/doubanJson0Mac.txt";
-        MergerUtil merger = new MergerUtil();
+        DataMergerUtil merger = new DataMergerUtil();
         List<Integer> list = merger.parseJsonEventId(path);
         System.out.println(list.size());
         list.forEach(System.out::println);
@@ -81,10 +81,10 @@ public class MergeTest {
                         .collect(Collectors.toList());
         for(String file:txtFiles){
             System.out.println("file:"+file);
-            List<Integer> tempEventid = MergerUtil.parseTxtEventId(file);
+            List<Integer> tempEventid = DataMergerUtil.parseTxtEventId(file);
             eventId.addAll(tempEventid);
             if(file.startsWith("douban")){
-                List<Integer> tempParticipantsId = MergerUtil.parseTxtParticipantsId(file);
+                List<Integer> tempParticipantsId = DataMergerUtil.parseTxtParticipantsId(file);
                 participantId.addAll(tempParticipantsId);
             }
 
@@ -97,9 +97,9 @@ public class MergeTest {
                         .collect(Collectors.toList());
         for(String file:jsonFiles){
             System.out.println("file:"+file);
-            List<Integer> tempEvent = MergerUtil.parseJsonEventId(file);
+            List<Integer> tempEvent = DataMergerUtil.parseJsonEventId(file);
             eventId.addAll(tempEvent);
-            List<Integer> tempUser = MergerUtil.parseJsonParticipantsId(file);
+            List<Integer> tempUser = DataMergerUtil.parseJsonParticipantsId(file);
             participantId.addAll(tempUser);
         }
 
