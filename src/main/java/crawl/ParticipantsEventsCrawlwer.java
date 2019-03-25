@@ -27,7 +27,7 @@ public class ParticipantsEventsCrawlwer extends CrawlAction{
                 String rawData = crawl(url);
                 String data = parseURL(rawData);
 
-                if(data!=null && !data.isBlank()){
+                if(data!=null && !data.isEmpty()){
                     result.append(data);
                 }
             }
