@@ -34,10 +34,10 @@ public class DoubanUserDownloader extends AbstractDownloader {
 
 
     /**
+     * To get event ids, and add ids into eventQueue
      * return eventID
      * @return
      */
-
     @Override
     public String download() {
 

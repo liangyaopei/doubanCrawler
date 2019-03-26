@@ -16,7 +16,11 @@ import java.util.concurrent.Future;
  */
 public class DataSaver {
 
-
+    /**
+     * This method is to store the data from the executor pool
+     * @param list request task to get data
+     * @param path path to store the data
+     */
     public static void saveData(List<Future<String>> list,String path){
         try(BufferedWriter writer = Files.newBufferedWriter(Paths.get(path),
                 StandardCharsets.UTF_8,
@@ -27,7 +31,10 @@ public class DataSaver {
                 try{
                     Future<String> task = iterator.next();
                     String data = task.get();
-                    writer.write(data);
+                    if(data.isEmpty()==false){
+                        writer.write(data);
+                        System.out.println(Thread.currentThread().getName()+" saving data");
+                    }
                 }catch (InterruptedException | ExecutionException e){
                     e.printStackTrace();
                 }

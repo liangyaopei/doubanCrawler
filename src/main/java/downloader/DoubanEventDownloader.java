@@ -37,6 +37,7 @@ public class DoubanEventDownloader extends AbstractDownloader {
     /**
      *
      * @return event information + "\n" + event participants in json format
+     * if any of the three request fails, then the result is empty string
      * if result is empty, means that it failed to fetch content
      */
     @Override

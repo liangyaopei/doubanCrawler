@@ -17,6 +17,8 @@ public class DoubanBFSDownload {
     private String eventPath = "./douban/seed/events.txt";
     private String userPath = "./douban/seed/users.txt";
     private String outputPath = "";
+    private String eventOutpttPath ="";
+    private String userOutputPath = "";
     private int numThread = 1;
     private ExecutorService executorService;
 
@@ -30,11 +32,14 @@ public class DoubanBFSDownload {
 
     public DoubanBFSDownload(int numThread,
                              String eventPath, String userPath,
-                             String outputPath) {
+                             String outputPath,
+                             String eventOutpttPath,String userOutputPath) {
         this.numThread = numThread;
         this.eventPath = eventPath;
         this.userPath = userPath;
         this.outputPath = outputPath;
+        this.eventOutpttPath = eventOutpttPath;
+        this.userOutputPath = userOutputPath;
 
         eventSet = new ConcurrentHashMap<>();
         userSet = new ConcurrentHashMap<>();
@@ -46,6 +51,9 @@ public class DoubanBFSDownload {
         eventQueue.addAll(eventId);
         Set<Integer> userId = loadData(userPath);
         userQueue.addAll(userId);
+
+        System.out.println("event size;"+eventQueue.size());
+        System.out.println("user size:"+userQueue.size());
     }
 
 
@@ -54,22 +62,30 @@ public class DoubanBFSDownload {
         while (true){
             while (!eventQueue.isEmpty()){
                 Integer eventId = eventQueue.poll();
-                DoubanEventDownloader downloader = new DoubanEventDownloader(eventId,
-                        eventQueue,userQueue,eventSet,userSet);
-                Future<String> task = executorService.submit(downloader);
-                result.add(task);
+                if(!eventSet.containsKey(eventId)){
+                    DoubanEventDownloader downloader = new DoubanEventDownloader(eventId,
+                            eventQueue,userQueue,eventSet,userSet);
+                    Future<String> task = executorService.submit(downloader);
+                    result.add(task);
+                }
             }
             DataSaver.saveData(result,outputPath);
+            System.out.println("Now,event queue is empty");
+            SeedManagerUtil.storeSeed(eventSet.keySet(),eventOutpttPath);
 
             while (!userQueue.isEmpty()){
                 Integer userId = userQueue.poll();
-                DoubanUserDownloader downloader = new DoubanUserDownloader(userId,
-                        eventQueue,userQueue,eventSet,userSet);
-                Future<String> task = executorService.submit(downloader);
-                result.add(task);
+                if(!userSet.containsKey(userId)){
+                    DoubanUserDownloader downloader = new DoubanUserDownloader(userId,
+                            eventQueue,userQueue,eventSet,userSet);
+                    Future<String> task = executorService.submit(downloader);
+                    result.add(task);
+                }
             }
 
             DataSaver.pullData(result);
+            System.out.println("Now,user queue is empty");
+            SeedManagerUtil.storeSeed(userSet.keySet(),userOutputPath);
 
             if(eventQueue.isEmpty() && userQueue.isEmpty()){
                 break;
