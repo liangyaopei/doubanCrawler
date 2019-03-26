@@ -9,7 +9,8 @@ public class DoubanBFSDownloadTest {
 
     private String eventPath = "./douban/seed/events.txt";
     private String userPath = "./douban/seed/users.txt";
-    private String outputPath = "./douban/data/dataJson.txt";
+    private String eventDatPath = "./douban/data/eventsJson.txt";
+    private String userDataPath = "./douban/data/usersJson.txt";
     private String eventOutputPath = "./douban/visited/events.txt";
     private String userOutputPath = "./douban/visited/users.txt";
     private int numThread = 3;
@@ -21,7 +22,7 @@ public class DoubanBFSDownloadTest {
        // DataSaver.saveData(null,outputPath);
 
         DoubanBFSDownload download = new DoubanBFSDownload(numThread,eventPath,
-                userPath,outputPath,
+                userPath,eventDatPath,userDataPath,
                 eventOutputPath,userOutputPath);
         download.beginDownload();
 

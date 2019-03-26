@@ -1,5 +1,7 @@
 package downloader;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import parser.DoubanJsonparser;
 
 import java.io.IOException;
@@ -61,10 +63,21 @@ public class DoubanEventDownloader extends AbstractDownloader {
             userQueue.addAll(wishersData);
 
             String eventJsonData = downloadJsonWithProxy(eventURL);
+            Gson gson = new Gson();
+            JsonObject eventObject  = gson.fromJson(eventJsonData, JsonObject.class);
+            JsonObject participantsObject = gson.fromJson(participantJsonData,
+                    JsonObject.class);
+            JsonObject wishers = gson.fromJson(wisherJsonData,JsonObject.class);
+            eventObject.add("participants",participantsObject);
+            eventObject.add("wishers",wishers);
+            builder.append(eventObject)
+                    .append("\n");
+            /*
             builder.append(eventJsonData)
                     .append("\n")
                     .append(participantJsonData)
                     .append("\n");
+            */
 
         }catch (IOException | NumberFormatException e){
             e.printStackTrace();
@@ -79,12 +92,12 @@ public class DoubanEventDownloader extends AbstractDownloader {
     }
 
     public String getParticipantsUrl(){
-        String url = "https://api.douban.com/v2/event/%d/participants";
+        String url = "https://api.douban.com/v2/event/%d/participants?start=0&count=100";
         return String.format(url,identity);
     }
 
     public String getWishersUrl(){
-        String url = "https://api.douban.com/v2/event/%d/wishers";
+        String url = "https://api.douban.com/v2/event/%d/wishers?start=0&count=100";
         return String.format(url,identity);
     }
 }

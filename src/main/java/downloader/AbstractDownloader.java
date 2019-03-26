@@ -30,8 +30,8 @@ public abstract class AbstractDownloader implements Callable<String> {
     public String downloadJsonWithProxy(String url) throws IOException {
         String data = Jsoup.connect(url)
                 .timeout(3000)
-                .header(DoubanProxySetting.ProxyHeadKey,DoubanProxySetting.ProxyHeadVal)
-                .proxy(DoubanProxySetting.getProxy())
+             //   .header(DoubanProxySetting.ProxyHeadKey,DoubanProxySetting.ProxyHeadVal)
+             //   .proxy(DoubanProxySetting.getProxy())
                 .ignoreContentType(true)
                 .execute().body();
         return data;

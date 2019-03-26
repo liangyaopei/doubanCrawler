@@ -16,7 +16,8 @@ import java.util.stream.Collectors;
 public class DoubanBFSDownload {
     private String eventPath = "./douban/seed/events.txt";
     private String userPath = "./douban/seed/users.txt";
-    private String outputPath = "";
+    private String eventDataPath = "";
+    private String userDataPath = "";
     private String eventOutpttPath ="";
     private String userOutputPath = "";
     private int numThread = 1;
@@ -32,12 +33,13 @@ public class DoubanBFSDownload {
 
     public DoubanBFSDownload(int numThread,
                              String eventPath, String userPath,
-                             String outputPath,
+                             String eventDataPath,String userDataPath,
                              String eventOutpttPath,String userOutputPath) {
         this.numThread = numThread;
         this.eventPath = eventPath;
         this.userPath = userPath;
-        this.outputPath = outputPath;
+        this.eventDataPath = eventDataPath;
+        this.userDataPath = userDataPath;
         this.eventOutpttPath = eventOutpttPath;
         this.userOutputPath = userOutputPath;
 
@@ -69,7 +71,7 @@ public class DoubanBFSDownload {
                     result.add(task);
                 }
             }
-            DataSaver.saveData(result,outputPath);
+            DataSaver.saveData(result,eventDataPath);
             System.out.println("Now,event queue is empty");
             SeedManagerUtil.storeSeed(eventSet.keySet(),eventOutpttPath);
 
@@ -83,7 +85,7 @@ public class DoubanBFSDownload {
                 }
             }
 
-            DataSaver.pullData(result);
+            DataSaver.saveData(result,userDataPath);
             System.out.println("Now,user queue is empty");
             SeedManagerUtil.storeSeed(userSet.keySet(),userOutputPath);
 

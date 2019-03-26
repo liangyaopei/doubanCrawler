@@ -21,8 +21,6 @@ public class DoubanEventDownloaderTest {
 
     @Test
     public void urlTest(){
-        DoubanEventDownloader downloader = new DoubanEventDownloader(31993290,
-        null,null,null,null);
        // String url = "https://api.douban.com/v2/event/31754598/%d";
         System.out.println(downloader.getEventUrl());
         System.out.println(downloader.getParticipantsUrl());

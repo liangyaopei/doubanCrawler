@@ -25,7 +25,8 @@ public class DoubanUserDownloaderTest {
 
     @Test
     public void downloadTest(){
-        downloader.download();
+        String data = downloader.download();
+        System.out.println(data);
         System.out.println("event:");
         eventQueue.forEach(System.out::println);
     }
