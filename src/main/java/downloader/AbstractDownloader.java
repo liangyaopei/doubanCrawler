@@ -34,6 +34,11 @@ public abstract class AbstractDownloader implements Callable<String> {
              //   .proxy(DoubanProxySetting.getProxy())
                 .ignoreContentType(true)
                 .execute().body();
+        try{
+            Thread.sleep(300);
+        }catch (InterruptedException e){
+            e.printStackTrace();
+        }
         return data;
     }
 
