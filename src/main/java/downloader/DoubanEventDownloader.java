@@ -92,12 +92,14 @@ public class DoubanEventDownloader extends AbstractDownloader {
     }
 
     public String getParticipantsUrl(){
-        String url = "https://api.douban.com/v2/event/%d/participants?start=0&count=100";
+      //  String url = "https://api.douban.com/v2/event/%d/participants?start=0&count=100";
+        String url = "https://api.douban.com/v2/event/%d/participants";
         return String.format(url,identity);
     }
 
     public String getWishersUrl(){
-        String url = "https://api.douban.com/v2/event/%d/wishers?start=0&count=100";
+     //   String url = "https://api.douban.com/v2/event/%d/wishers?start=0&count=100";
+        String url = "https://api.douban.com/v2/event/%d/wishers";
         return String.format(url,identity);
     }
 }

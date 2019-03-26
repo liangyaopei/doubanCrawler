@@ -76,13 +76,14 @@ public class DoubanUserDownloader extends AbstractDownloader {
     }
 
     public String getParticipantsEventUrl(){
-        String url = "https://api.douban.com/v2/event/user_participated/%d?start=0&count=50";
-        //String url = "https://api.douban.com/v2/event/user_participated/%d";
+        //String url = "https://api.douban.com/v2/event/user_participated/%d?start=0&count=50";
+        String url = "https://api.douban.com/v2/event/user_participated/%d";
         return String.format(url,identity);
     }
 
     public String getWisherEventUrl(){
-        String url = "https://api.douban.com/v2/event/user_wished/%d?start=0&count=50";
+        //String url = "https://api.douban.com/v2/event/user_wished/%d?start=0&count=50";
+        String url = "https://api.douban.com/v2/event/user_wished/%d";
         return String.format(url,identity);
     }
 }

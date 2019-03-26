@@ -35,6 +35,7 @@ public class DataSaver {
                         writer.write(data);
                         System.out.println(Thread.currentThread().getName()+" saving data");
                     }
+                    Thread.sleep(300);
                 }catch (InterruptedException | ExecutionException e){
                     e.printStackTrace();
                 }
