@@ -1,4 +1,4 @@
-package parse;
+package htmlparse;
 
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;

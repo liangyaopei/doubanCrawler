@@ -1,4 +1,4 @@
-package download;
+package naiveJsondownload;
 
 import com.google.gson.Gson;
 import model.DoubanEventJsonFormat;

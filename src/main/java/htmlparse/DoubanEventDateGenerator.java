@@ -1,4 +1,4 @@
-package parse;
+package htmlparse;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;

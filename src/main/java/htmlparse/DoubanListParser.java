@@ -1,11 +1,10 @@
-package parse;
+package htmlparse;
 
 import model.EventInformation;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import setting.DoubanLoginCookie;
 import setting.DoubanProxySetting;
 
 import java.io.IOException;

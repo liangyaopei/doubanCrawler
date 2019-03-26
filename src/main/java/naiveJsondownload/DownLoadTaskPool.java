@@ -1,6 +1,4 @@
-package download;
-
-import parse.DoubanListTask;
+package naiveJsondownload;
 
 import java.util.ArrayList;
 import java.util.List;

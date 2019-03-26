@@ -1,4 +1,4 @@
-package parse;
+package htmlparse;
 
 import model.EventInformation;
 

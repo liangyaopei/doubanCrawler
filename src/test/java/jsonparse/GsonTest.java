@@ -48,10 +48,11 @@ public class GsonTest {
 
     @Test
     public void checkKeyValue() throws IOException{
-      //  String participantsURL = "https://api.douban.com/v2/event/31754598"+"/participants";
+        //String participantsURL = "https://api.douban.com/v2/event/31920676"+"/participants";
        // String url = "https://api.douban.com/v2/event/list?loc=118282&districts=all&day=future&type=all&count=100";
-        //String url = "https://api.douban.com/v2/event/user_participated/40524069";
-        String url = "https://api.douban.com/v2/event/user_participated/3956041?start=100&count=100";
+       // String url = "https://api.douban.com/v2/event/user_participated/40524069";
+        String url =" https://api.douban.com/v2/event/user_wished/40524069";
+        // url = "https://api.douban.com/v2/event/user_participated/3956041?start=100&count=100";
 
         String data = getData(url);
         GsonBuilder builder = new GsonBuilder();
@@ -82,6 +83,7 @@ public class GsonTest {
             JsonObject object =element.getAsJsonObject();
 
             System.out.println("count:"+(count++)+",title:"+object.get("title"));
+            System.out.println("id:"+object.get("id"));
             System.out.println("adapt_url:"+object.get("adapt_url"));
             System.out.println("time:"+object.get("time_str"));
         }

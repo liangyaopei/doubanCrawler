@@ -1,7 +1,6 @@
 package application;
 
 import crawl.CrawlPool;
-import download.DownLoadTaskPool;
 
 import java.io.File;
 import java.util.Scanner;

@@ -1,4 +1,4 @@
-package download;
+package naiveJsondownload;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
