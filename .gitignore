@@ -4,6 +4,5 @@
 *.iml
 *.class
 /target
-/douban/data
-/douban/visited
-/douban/else
+/douban/
+!/douban/seed
