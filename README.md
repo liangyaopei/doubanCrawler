@@ -1,3 +1,5 @@
+[TOC]
+
 # 爬虫基本步骤
 
 ## 下载数据
@@ -118,6 +120,41 @@ java代码
 ```
 
 - 注意到，第一步中URL中，时间是可以变化的，豆瓣的网站提供过去一年的事件查询，通过变化URL中时间，来获取不同的事件。
+
+  下面是如期生成器的代码:
+
+  ```java
+  public class DoubanEventDateGenerator {
+     public static List<String> findDates(String start, String end,int interval) {
+          List<Date> lDate = new ArrayList();
+          SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+          try{
+              Date dBegin = sdf.parse(start);
+              Date dEnd = sdf.parse(end);
+              lDate.add(dBegin);
+              Calendar calBegin = Calendar.getInstance();
+              // 使用给定的 Date 设置此 Calendar 的时间
+              calBegin.setTime(dBegin);
+              Calendar calEnd = Calendar.getInstance();
+              // 使用给定的 Date 设置此 Calendar 的时间
+              calEnd.setTime(dEnd);
+              // 测试此日期是否在指定日期之后
+              while (dEnd.after(calBegin.getTime())) {
+                  // 根据日历的规则，为给定的日历字段添加或减去指定的时间量
+                  calBegin.add(Calendar.DAY_OF_MONTH, interval);
+                  lDate.add(calBegin.getTime());
+              }
+          }catch (ParseException e){
+              e.printStackTrace();
+          }
+          return lDate.stream()
+                  .map(date -> sdf.format(date).replace("-",""))
+                  .collect(Collectors.toList());
+      }
+  }
+  ```
+
+  
 
 - 另外，根据不同城市的URL，进行上述步骤，获得更多的事件。例如，广州的豆瓣同城URL是
 
