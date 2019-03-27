@@ -22,9 +22,10 @@ public class DoubanEventDownloaderTest {
     @Test
     public void urlTest(){
        // String url = "https://api.douban.com/v2/event/31754598/%d";
+        int start =0;
         System.out.println(downloader.getEventUrl());
-        System.out.println(downloader.getParticipantsUrl());
-        System.out.println(downloader.getWishersUrl());
+        System.out.println(downloader.getParticipantsUrl(start));
+        System.out.println(downloader.getWishersUrl(start));
     }
 
     @Test

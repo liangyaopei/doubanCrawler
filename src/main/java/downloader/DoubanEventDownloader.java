@@ -1,14 +1,19 @@
 package downloader;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.reflect.TypeToken;
 import parser.DoubanJsonparser;
 
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.stream.Collectors;
 
 /**
  * @Author LYaopei
@@ -49,27 +54,67 @@ public class DoubanEventDownloader extends AbstractDownloader {
             visitedEvent.put(identity,true);
 
             String eventURL = getEventUrl();
-            String participantURL = getParticipantsUrl();
-            String wisherURL = getWishersUrl();
+            int start,count = 100;
 
-            String participantJsonData = downloadJsonWithProxy(participantURL);
-            Set<Integer> participantsData = DoubanJsonparser
-                    .getParticipantsIdThroughEventJson(participantJsonData);
-            userQueue.addAll(participantsData);
 
-            String wisherJsonData = downloadJsonWithProxy(wisherURL);
-            Set<Integer> wishersData = DoubanJsonparser
-                    .getParticipantsIdThroughEventJson(wisherJsonData);
-            userQueue.addAll(wishersData);
+            Set<Integer> participantsSet = new HashSet<>();
+            start = 0;
+            boolean more ;
+            do{
+                String participantURL = getParticipantsUrl(start);
+                start +=count;
+                String participantJsonData = downloadJsonWithProxy(participantURL);
+                 more = DoubanJsonparser
+                        .getParticipantsIdThroughEventJson(participantJsonData,participantsSet,start);
+
+            }while (more == true);
+            userQueue.addAll(participantsSet);
+
+
+            start = 0;
+            Set<Integer> wishersSet = new HashSet<>();
+            do{
+                String wisherURL = getWishersUrl(start);
+                start += count;
+
+                String wisherJsonData = downloadJsonWithProxy(wisherURL);
+                more = DoubanJsonparser
+                        .getParticipantsIdThroughEventJson(wisherJsonData,wishersSet,start);
+
+            }while (more == true);
+            userQueue.addAll(wishersSet);
+
+
 
             String eventJsonData = downloadJsonWithProxy(eventURL);
             Gson gson = new Gson();
             JsonObject eventObject  = gson.fromJson(eventJsonData, JsonObject.class);
+            JsonElement idElement = gson.toJsonTree(identity,
+                    new TypeToken<Integer>(){}.getType());
+            eventObject.add("eventId",idElement);
+
+            List<Integer> userList = participantsSet.stream().collect(Collectors.toList());
+            JsonElement userElement = gson.toJsonTree(userList,
+                    new TypeToken<List<Integer>>(){}.getType());
+            eventObject.add("participants",userElement);
+
+            List<Integer> wishersList = wishersSet.stream().collect(Collectors.toList());
+            JsonElement wishersElement = gson.toJsonTree(wishersList,
+                    new TypeToken<List<Integer>>(){}.getType());
+            eventObject.add("wishers",wishersElement);
+
+            eventObject.remove("image");
+            eventObject.remove("owner");
+            eventObject.remove("alt");
+
+           // System.out.println("wisher:"+wishersList.size());
+            /*
             JsonObject participantsObject = gson.fromJson(participantJsonData,
                     JsonObject.class);
             JsonObject wishers = gson.fromJson(wisherJsonData,JsonObject.class);
             eventObject.add("participants",participantsObject);
             eventObject.add("wishers",wishers);
+            */
             builder.append(eventObject)
                     .append("\n");
             /*
@@ -81,6 +126,7 @@ public class DoubanEventDownloader extends AbstractDownloader {
 
         }catch (IOException | NumberFormatException e){
             e.printStackTrace();
+            System.err.println("event:"+identity);
             builder = new StringBuilder();
         }
         return builder.toString();
@@ -91,15 +137,15 @@ public class DoubanEventDownloader extends AbstractDownloader {
         return String.format(url, identity);
     }
 
-    public String getParticipantsUrl(){
-      //  String url = "https://api.douban.com/v2/event/%d/participants?start=0&count=100";
-        String url = "https://api.douban.com/v2/event/%d/participants";
-        return String.format(url,identity);
+    public String getParticipantsUrl(int start){
+        String url = "https://api.douban.com/v2/event/%d/participants?start=%d&count=100";
+        //String url = "https://api.douban.com/v2/event/%d/participants";
+        return String.format(url,identity,start);
     }
 
-    public String getWishersUrl(){
-     //   String url = "https://api.douban.com/v2/event/%d/wishers?start=0&count=100";
-        String url = "https://api.douban.com/v2/event/%d/wishers";
-        return String.format(url,identity);
+    public String getWishersUrl(int start){
+        String url = "https://api.douban.com/v2/event/%d/wishers?start=%d&count=100";
+        //String url = "https://api.douban.com/v2/event/%d/wishers";
+        return String.format(url,identity,start);
     }
 }

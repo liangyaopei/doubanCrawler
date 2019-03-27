@@ -2,18 +2,24 @@ package bfs;
 
 import org.junit.Test;
 
+import java.util.List;
+
 /**
  * @Author LYaopei
  */
 public class DoubanBFSDownloadTest {
 
-    private String eventPath = "./douban/seed/events.txt";
-    private String userPath = "./douban/seed/users.txt";
-    private String eventDatPath = "./douban/data/eventsJson.txt";
+    private String eventSeedPath = "./douban/seed/events.txt";
+    private String userSeedPath = "./douban/seed/users.txt";
+    private String eventDataPath = "./douban/data/eventsJson.txt";
     private String userDataPath = "./douban/data/usersJson.txt";
-    private String eventOutputPath = "./douban/visited/events.txt";
-    private String userOutputPath = "./douban/visited/users.txt";
-    private int numThread = 3;
+    private String eventNewSeedPath = "./douban/seed/events1.txt";
+    private String userNewSeedPath = "./douban/seed/users1.txt";
+
+    /**
+     * 4 thread is good for my PC after testing
+     */
+    private int numThread = 4;
 
     @Test
     public void beginDownloadTest(){
@@ -21,10 +27,18 @@ public class DoubanBFSDownloadTest {
         System.out.println("programming begins");
        // DataSaver.saveData(null,outputPath);
 
-        DoubanBFSDownload download = new DoubanBFSDownload(numThread,eventPath,
-                userPath,eventDatPath,userDataPath,
-                eventOutputPath,userOutputPath);
+        DoubanBFSDownload download = new DoubanBFSDownload(numThread,eventSeedPath,
+                userSeedPath,eventDataPath,userDataPath,
+                eventNewSeedPath,userNewSeedPath);
+        download.setup();
         download.beginDownload();
 
+    }
+
+    @Test
+    public void getVisitedDataSet(){
+        String path ="./douban/data/testEventsJson.txt";
+        List<Integer> eventIdList = DoubanBFSDownload.getVisitedData(eventDataPath,"eventId");
+        System.out.println(eventIdList.size());
     }
 }

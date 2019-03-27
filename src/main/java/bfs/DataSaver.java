@@ -27,15 +27,17 @@ public class DataSaver {
                 StandardOpenOption.CREATE,StandardOpenOption.APPEND)){
             Iterator<Future<String>> iterator = list.iterator();
 
+
             while (iterator.hasNext()){
                 try{
                     Future<String> task = iterator.next();
                     String data = task.get();
                     if(data.isEmpty()==false){
                         writer.write(data);
-                        System.out.println(Thread.currentThread().getName()+" saving data");
+                        writer.flush();
+                        System.out.println(Thread.currentThread().getName()+" saving data ");
                     }
-                    Thread.sleep(300);
+                   // Thread.sleep(300);
                 }catch (InterruptedException | ExecutionException e){
                     e.printStackTrace();
                 }

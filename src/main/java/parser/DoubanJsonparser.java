@@ -14,9 +14,10 @@ import java.util.Set;
  */
 public class DoubanJsonparser {
 
-    private static void getDetailsFromJson(String jsonData,
+    public static boolean getDetailsFromJson(String jsonData,
                                            String arrayMemberName,String attribute,
-                                           Set<Integer> result)
+                                           Set<Integer> result,
+                                             int current)
             throws NumberFormatException{
         JsonElement jsonElement = new JsonParser().parse(jsonData);
         JsonObject jsonObject = jsonElement.getAsJsonObject();
@@ -26,6 +27,11 @@ public class DoubanJsonparser {
             int id = object.get(attribute).getAsInt();
             result.add(id);
         }
+        int count = jsonElement.getAsJsonObject().get("total").getAsInt();
+        if(count - current > 100)
+            return true;
+        else
+            return false;
     }
 
     /**
@@ -34,10 +40,9 @@ public class DoubanJsonparser {
      * @param jsonData
      * @return the participants Id of event
      */
-    public static Set<Integer> getParticipantsIdThroughEventJson(String jsonData) {
-        Set<Integer> result = new HashSet<>();
-        getDetailsFromJson(jsonData,"users","id",result);
-        return result;
+    public static boolean getParticipantsIdThroughEventJson(String jsonData,Set<Integer> result,int current) {
+
+        return getDetailsFromJson(jsonData,"users","id",result,current);
     }
 
 
@@ -47,9 +52,9 @@ public class DoubanJsonparser {
      * @param jsonData
      * @return
      */
-    public static Set<Integer> getEventIdThroughParticipantsJson(String jsonData){
-        Set<Integer> result = new HashSet<>();
-        getDetailsFromJson(jsonData,"events","id",result);
-        return result;
+    public static boolean getEventIdThroughParticipantsJson(String jsonData,
+                                                                 Set<Integer> result,
+                                                                 int current){
+        return getDetailsFromJson(jsonData,"events","id",result,current);
     }
 }

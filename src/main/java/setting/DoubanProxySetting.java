@@ -14,8 +14,8 @@ import org.jsoup.nodes.Document;
 
 public class DoubanProxySetting {
     // 代理隧道验证信息
-    public final static String ProxyUser = "H963V053174233AD";
-    public final static String ProxyPass = "41F879E8E33EA36C";
+    public final static String ProxyUser = "HQ3HYI0NQLNMY1VD";
+    public final static String ProxyPass = "1520A4CF467E32F9";
 
     // 代理服务器
     public final static String ProxyHost = "http-dyn.abuyun.com";
@@ -37,6 +37,7 @@ public class DoubanProxySetting {
                 }
             });
             holder = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(ProxyHost, ProxyPort));
+            System.out.println("Proxy Holder getting proxy");
         }
     }
     public static Proxy getProxy(){

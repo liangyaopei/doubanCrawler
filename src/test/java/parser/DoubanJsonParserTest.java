@@ -5,6 +5,8 @@ import org.jsoup.Jsoup;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * @Author LYaopei
@@ -17,14 +19,26 @@ public class DoubanJsonParserTest {
         return data;
     }
 
+
     @Test
-    public void getParticipantsIdThroughEventJsonTest() throws IOException{
-       String url = "https://api.douban.com/v2/event/31920676/participants";
+    public void getDetailsFromJsonTest() throws IOException{
+        String url = "https://api.douban.com/v2/event/31317328/participants";
         //String url = "https://api.douban.com/v2/event/31920676/wishers ";
         String jsonData = getJson(url);
+        int current = 100;
+        System.out.println(DoubanJsonparser.getDetailsFromJson(jsonData,
+                "users","id",new HashSet<>(),current));
+
+    }
+    @Test
+    public void getParticipantsIdThroughEventJsonTest() throws IOException{
+       String url = "https://api.douban.com/v2/event/31317328/participants";
+        //String url = "https://api.douban.com/v2/event/31920676/wishers ";
+        String jsonData = getJson(url);
+        Set<Integer> set = new HashSet<>();
+        int start =0;
         DoubanJsonparser
-                .getParticipantsIdThroughEventJson(jsonData)
-                .forEach(System.out::println);
+                .getParticipantsIdThroughEventJson(jsonData,set,start);
     }
 
     @Test
@@ -34,8 +48,9 @@ public class DoubanJsonParserTest {
 
 
         String jsonData = getJson(url);
+        Set<Integer> set = new HashSet<>();
+        int start =0;
         DoubanJsonparser
-                .getEventIdThroughParticipantsJson(jsonData)
-                .forEach(System.out::println);
+                .getEventIdThroughParticipantsJson(jsonData,set,start);
     }
 }

@@ -18,16 +18,22 @@
 
 ### 避免屏蔽
 
-因为短时间内多次访问网站会被屏蔽，上面的代码进行了代理设置。这里通过购买阿布云的HTTP隧道进行代理设置。Java 8以上使用代理，要坐如下设置：
+因为短时间内多次访问网站会被屏蔽，上面的代码进行了代理设置。这里通过购买阿布云的HTTP隧道进行代理设置。Java 8以上使用代理，要做如下设置：
 
 ```java
   System.setProperty("jdk.http.auth.tunneling.disabledSchemes", "");
 ```
 
-也可以使用Cookie来避免屏蔽，但是效率不高。
+也可以使用Cookie来避免屏蔽，但是效率不高。在多线程环境中，注意`Cookie`的初始化，只要初始化一次就好。
 
 ```java
- private static class LazyHolder{
+ public class DoubanLoginCookie {
+    private static final String login =
+            "https://accounts.douban.com/passport/login?source=main";
+    private static String username=""; //phone number
+    private static String password = "4812";
+
+    private static class LazyHolder{
         private static Map<String, String> cookies;
         public static Map<String, String> getCookies(){
             if(cookies == null){
@@ -44,6 +50,10 @@
             return cookies;
         }
     }
+    public static Map<String, String> getCookies(){
+        return LazyHolder.getCookies();
+    }
+}
 ```
 
 ## 解析数据
@@ -51,6 +61,8 @@
 数据解析分为HTML解析和JSON解析。
 
 ### HTML解析： 使用Jsoup解析HTML数据。
+
+具体代码见 `htmlparse` package。
 
 第一步，根据豆瓣网站上的列表获取事件的id。
 
@@ -115,12 +127,14 @@ java代码
 
 ### JSON数据解析：使用GSON来解析
 
+具体代码见`naiveJsonDownload` 包
+
 后来，我在github上发现了豆瓣的API文档，网址是：<https://douban-api-docs.zce.me/>
 
 第一步，通过如下URL可以获得某个城市的事件列表:
 
 ```java
-GET https://api.douban.com/v2/loc/list
+ https://api.douban.com/v2/loc/list
 ```
 
 第二步，根据城市列表，时间，类别，获得时间的list
@@ -208,6 +222,7 @@ result.add(task);
 
 ```
 参加事件的Json + 感兴趣事件的Json
+
 ```
 
 # 使用BFS爬取豆瓣同城事件
@@ -234,11 +249,68 @@ eid1   ------>  uid
 eid2   <------
 ```
 
+#### 事件 ---> 用户
+
 根据下列API获取事件的参与者id，存放到用户队列中。
 
 ```
 https://www.douban.com/event/{id}/participant
 ```
+
+java代码：
+
+```java
+public String getParticipantsUrl(int start){
+        String url = "https://api.douban.com/v2/event/%d/participants?start=%d&count=100";
+        //String url = "https://api.douban.com/v2/event/%d/participants";
+        return String.format(url,identity,start);
+ }
+```
+
+每次最多只返回100条数据，如果事件的参见人数超过100，要改变start值。获得参加者id后，将其存放到队列中。
+
+```java
+do{
+                String participantURL = getParticipantsUrl(start);
+                start +=count;
+                String participantJsonData = downloadJsonWithProxy(participantURL);
+                 more = DoubanJsonparser
+                        .getParticipantsIdThroughEventJson(participantJsonData,participantsSet,start);
+
+            }while (more == true);
+            userQueue.addAll(participantsSet);
+```
+
+返回的Json中会告诉参加人数的个数，做如下解析：
+
+```java
+public class DoubanJsonparser {
+
+    public static boolean getDetailsFromJson(String jsonData,
+                                           String arrayMemberName,String attribute,
+                                           Set<Integer> result,
+                                             int current)
+            throws NumberFormatException{
+        JsonElement jsonElement = new JsonParser().parse(jsonData);
+        JsonObject jsonObject = jsonElement.getAsJsonObject();
+        JsonArray jsonArray = jsonObject.getAsJsonArray(arrayMemberName);
+        for(JsonElement element:jsonArray){
+            JsonObject object = element.getAsJsonObject();
+            int id = object.get(attribute).getAsInt();
+            result.add(id);
+        }
+        int count = jsonElement.getAsJsonObject().get("total").getAsInt();
+        if(count - current > 100)
+            return true;
+        else
+            return false;
+    }
+}
+```
+
+具体下载代码如下，如果下载过程中出现异常，将会丢弃下载到的数据，返回空字符串。`DataSaver`类遇到字符串时，不会讲结果写入。
+
+#### 用户 ----> 事件
 
 根据以下API获取用户参加和感兴趣的事件，提取事件id，存放到事件队列中。
 
@@ -246,18 +318,29 @@ https://www.douban.com/event/{id}/participant
 https://api.douban.com/v2/event/user_participated/%d?start=0&count=100"
 ```
 
-和
+java 代码
 
-```
-https://api.douban.com/v2/event/user_wished/%d?start=0&count=100
+```java
+ public String getParticipantsEventUrl(int start){
+        String url = "https://api.douban.com/v2/event/user_participated/%d?start=%d&count=50";
+        //String url = "https://api.douban.com/v2/event/user_participated/%d";
+        return String.format(url,identity,start);
+    }
 ```
 
-java代码:
+
+
+#### 下载
+
+下载的代码如下：
+
+java代码如下，当事件队列和用户队列都为空时，程序结束。
 
 ```java
 
     public void beginDownload(){
         List<Future<String>> result = new LinkedList<>();
+
         while (true){
             while (!eventQueue.isEmpty()){
                 Integer eventId = eventQueue.poll();
@@ -270,7 +353,8 @@ java代码:
             }
             DataSaver.saveData(result,eventDataPath);
             System.out.println("Now,event queue is empty");
-            SeedManagerUtil.storeSeed(eventSet.keySet(),eventOutpttPath);
+            //保存将要访问的用户id
+            SeedManagerUtil.storeSeed(userQueue.stream().distinct().sorted().collect(Collectors.toList()), userNewSeedPath);
 
             while (!userQueue.isEmpty()){
                 Integer userId = userQueue.poll();
@@ -278,13 +362,14 @@ java代码:
                     DoubanUserDownloader downloader = new DoubanUserDownloader(userId,
                             eventQueue,userQueue,eventSet,userSet);
                     Future<String> task = executorService.submit(downloader);
-                    result.add(task);
                 }
             }
 
             DataSaver.saveData(result,userDataPath);
             System.out.println("Now,user queue is empty");
-            SeedManagerUtil.storeSeed(userSet.keySet(),userOutputPath);
+            //保存将要访问的事件id
+            SeedManagerUtil.storeSeed(eventQueue.stream().distinct().sorted().collect(Collectors.toList()), eventNewSeedPath);
+
 
             if(eventQueue.isEmpty() && userQueue.isEmpty()){
                 break;
@@ -294,7 +379,7 @@ java代码:
     }
 ```
 
-
+因为程序可能随机
 
 ## 豆瓣同城API文档
 

@@ -12,7 +12,7 @@ import java.util.Map;
 public class DoubanLoginCookie {
     private static final String login =
             "https://accounts.douban.com/passport/login?source=main";
-    private static String username="13267089109";
+    private static String username=""; //phone number
     private static String password = "4812";
 
     private static class LazyHolder{

@@ -6,7 +6,9 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -18,11 +20,21 @@ public class SeedManagerUtil {
     public final static String eventPath ="./douban/seed/events.txt";
     public final static String userPath = "./douban/seed/users.txt";
 
-    public static Set<String> loadSeeds(String path){
-        Set<String> result = new HashSet<>();
+    /**
+     * distinct sort list
+     * @param path
+     * @return
+     */
+    public static List<Integer> loadSeeds(String path){
+        List<Integer> result = new ArrayList<>();
         try {
-            result = Files.readAllLines(Paths.get(path))
-            .stream().collect(Collectors.toSet());
+            result = Files
+                    .readAllLines(Paths.get(path))
+                    .stream()
+                    .map(id -> Integer.parseInt(id))
+                    .distinct()
+                    .sorted()
+                    .collect(Collectors.toList());
 
         }catch (IOException e){
             e.printStackTrace();
@@ -30,11 +42,11 @@ public class SeedManagerUtil {
         return result;
     }
 
-    public static void storeSeed(Set<Integer> set,String path){
+    public static void storeSeed(List<Integer> list,String path){
         try(BufferedWriter writer = Files.newBufferedWriter(Paths.get(path),
                 StandardCharsets.UTF_8,
                 StandardOpenOption.CREATE,StandardOpenOption.APPEND)){
-            for(Integer item:set){
+            for(Integer item:list){
                 writer.write(item);
                 writer.write("\n");
             }

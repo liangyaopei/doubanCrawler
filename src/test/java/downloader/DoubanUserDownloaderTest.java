@@ -19,15 +19,16 @@ public class DoubanUserDownloaderTest {
 
     @Test
     public void urlTest(){
-        System.out.println(downloader.getParticipantsEventUrl());
-        System.out.println(downloader.getWisherEventUrl());
+        int start = 0;
+        System.out.println(downloader.getParticipantsEventUrl(start));
+        System.out.println(downloader.getWisherEventUrl(start));
     }
 
     @Test
     public void downloadTest(){
         String data = downloader.download();
         System.out.println(data);
-        System.out.println("event:");
-        eventQueue.forEach(System.out::println);
+    //    System.out.println("event:");
+        //eventQueue.forEach(System.out::println);
     }
 }

@@ -1,26 +1,35 @@
 package bfs;
 
+
+import com.google.gson.JsonParser;
 import downloader.DoubanEventDownloader;
 import downloader.DoubanUserDownloader;
 import utils.SeedManagerUtil;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @Author LYaopei
  */
 public class DoubanBFSDownload {
-    private String eventPath = "./douban/seed/events.txt";
-    private String userPath = "./douban/seed/users.txt";
-    private String eventDataPath = "";
-    private String userDataPath = "";
-    private String eventOutpttPath ="";
-    private String userOutputPath = "";
-    private int numThread = 1;
+
+
+    private String eventSeedPath = "./douban/seed/events.txt";
+    private String userSeedPath = "./douban/seed/users.txt";
+    private String eventDataPath = "./douban/data/eventsJson.txt";
+    private String userDataPath = "./douban/data/usersJson.txt";
+    private String eventNewSeedPath = "./douban/seed/events1.txt";
+    private String userNewSeedPath = "./douban/seed/users1.txt";
+    private int numThread = 3;
     private ExecutorService executorService;
 
     private ConcurrentHashMap<Integer,Boolean> eventSet;
@@ -32,16 +41,17 @@ public class DoubanBFSDownload {
 
 
     public DoubanBFSDownload(int numThread,
-                             String eventPath, String userPath,
+                             String eventSeedPath, String userSeedPath,
                              String eventDataPath,String userDataPath,
-                             String eventOutpttPath,String userOutputPath) {
+                             String eventNewSeedPath,String userNewSeedPath) {
         this.numThread = numThread;
-        this.eventPath = eventPath;
-        this.userPath = userPath;
+        this.eventSeedPath = eventSeedPath;
+        this.userSeedPath = userSeedPath;
         this.eventDataPath = eventDataPath;
         this.userDataPath = userDataPath;
-        this.eventOutpttPath = eventOutpttPath;
-        this.userOutputPath = userOutputPath;
+        this.eventNewSeedPath = eventNewSeedPath;
+        this.userNewSeedPath = userNewSeedPath;
+
 
         eventSet = new ConcurrentHashMap<>();
         userSet = new ConcurrentHashMap<>();
@@ -49,10 +59,20 @@ public class DoubanBFSDownload {
         userQueue = new ConcurrentLinkedQueue<>();
         executorService = Executors.newFixedThreadPool(numThread);
 
-        Set<Integer> eventId = loadData(eventPath);
-        eventQueue.addAll(eventId);
-        Set<Integer> userId = loadData(userPath);
-        userQueue.addAll(userId);
+
+
+    }
+
+    public void setup(){
+        Set<Integer> eventSeedIdList = SeedManagerUtil.loadSeeds(eventSeedPath).stream().collect(Collectors.toSet());
+        Set<Integer> visitedEventList = getVisitedData(eventDataPath,"id").stream().collect(Collectors.toSet());
+        eventSeedIdList.removeAll(visitedEventList);
+        eventQueue.addAll(eventSeedIdList);
+
+        Set<Integer> userSeedIdList = SeedManagerUtil.loadSeeds(userSeedPath).stream().collect(Collectors.toSet());
+        Set<Integer> visitedUserList = getVisitedData(userDataPath,"userId").stream().collect(Collectors.toSet());
+        userSeedIdList.removeAll(visitedUserList);
+        userQueue.addAll(userSeedIdList);
 
         System.out.println("event size;"+eventQueue.size());
         System.out.println("user size:"+userQueue.size());
@@ -61,6 +81,7 @@ public class DoubanBFSDownload {
 
     public void beginDownload(){
         List<Future<String>> result = new LinkedList<>();
+
         while (true){
             while (!eventQueue.isEmpty()){
                 Integer eventId = eventQueue.poll();
@@ -69,11 +90,17 @@ public class DoubanBFSDownload {
                             eventQueue,userQueue,eventSet,userSet);
                     Future<String> task = executorService.submit(downloader);
                     result.add(task);
+                    /*
+                    List<Future<String>> temp =new ArrayList<>(1);
+                    temp.add(task);
+                    DataSaver.saveData(temp,eventDataPath);
+                    */
                 }
             }
             DataSaver.saveData(result,eventDataPath);
             System.out.println("Now,event queue is empty");
-            SeedManagerUtil.storeSeed(eventSet.keySet(),eventOutpttPath);
+            //保存将要访问的用户id
+            SeedManagerUtil.storeSeed(userQueue.stream().distinct().sorted().collect(Collectors.toList()), userNewSeedPath);
 
             while (!userQueue.isEmpty()){
                 Integer userId = userQueue.poll();
@@ -81,13 +108,21 @@ public class DoubanBFSDownload {
                     DoubanUserDownloader downloader = new DoubanUserDownloader(userId,
                             eventQueue,userQueue,eventSet,userSet);
                     Future<String> task = executorService.submit(downloader);
+
                     result.add(task);
+                    /*
+                    List<Future<String>> temp =new ArrayList<>(1);
+                    temp.add(task);
+                    DataSaver.saveData(temp,eventDataPath);
+                    */
                 }
             }
 
             DataSaver.saveData(result,userDataPath);
             System.out.println("Now,user queue is empty");
-            SeedManagerUtil.storeSeed(userSet.keySet(),userOutputPath);
+            //保存将要访问的事件id
+            SeedManagerUtil.storeSeed(eventQueue.stream().distinct().sorted().collect(Collectors.toList()), eventNewSeedPath);
+
 
             if(eventQueue.isEmpty() && userQueue.isEmpty()){
                 break;
@@ -96,11 +131,20 @@ public class DoubanBFSDownload {
         executorService.shutdown();
     }
 
+    public static List<Integer> getVisitedData(String path,String memberName){
+        List<Integer> result = new ArrayList<>();
+        try(Stream<String> lines = Files.lines(Paths.get(path))){
+            JsonParser jsonParser = new JsonParser();
+            result = lines.map(line ->
 
-    public Set<Integer> loadData(String path){
-        return SeedManagerUtil.loadSeeds(path)
-                .stream()
-                .map(id -> Integer.parseInt(id))
-                .collect(Collectors.toSet());
+                        jsonParser.parse(line).getAsJsonObject().get(memberName).getAsInt()
+
+            )
+                    .distinct().sorted().collect(Collectors.toList());
+
+        }catch (IOException e){
+            e.printStackTrace();
+        }
+        return result;
     }
 }
