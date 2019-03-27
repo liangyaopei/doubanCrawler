@@ -3,6 +3,8 @@ package bfs;
 import org.junit.Test;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @Author LYaopei
@@ -40,5 +42,15 @@ public class DoubanBFSDownloadTest {
         String path ="./douban/data/testEventsJson.txt";
         List<Integer> eventIdList = DoubanBFSDownload.getVisitedData(eventDataPath,"eventId");
         System.out.println(eventIdList.size());
+    }
+
+    @Test
+    public void getSeedDataTest(){
+         String eventDataPath = "./douban/data/eventsJson.txt";
+         String userDataPath = "./douban/data/usersJson.txt";
+        Set<Integer> seedEventIdSet = DoubanBFSDownload
+                .getSeedData(eventDataPath,"participants","wishers").stream().collect(Collectors.toSet());
+        System.out.println("seed user size:"+seedEventIdSet.size());
+
     }
 }
