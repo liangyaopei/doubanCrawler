@@ -49,16 +49,4 @@ public class DataSaver {
             e.printStackTrace();
         }
     }
-
-    public static void pullData(List<Future<String>> list){
-        Iterator<Future<String>> iterator = list.iterator();
-        while (iterator.hasNext()){
-            try{
-                iterator.next().get();
-            }catch (InterruptedException | ExecutionException e){
-                e.printStackTrace();
-            }
-            iterator.remove();
-        }
-    }
 }

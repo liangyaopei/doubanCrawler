@@ -176,6 +176,8 @@ result.add(task);
 然后逐个获得list中的结果，保存到本地
 
 ```java
+public class DataSaver {
+
 /**
      * This method is to store the data from the executor pool
      * @param list request task to get data
@@ -206,6 +208,8 @@ result.add(task);
             e.printStackTrace();
         }
     }
+    ....
+}
 ```
 
 ### 数据储存格式
@@ -260,17 +264,30 @@ https://www.douban.com/event/{id}/participant
 java代码：
 
 ```java
-public String getParticipantsUrl(int start){
+public class DoubanEventDownloader extends AbstractDownloader {
+    public String getParticipantsUrl(int start){
         String url = "https://api.douban.com/v2/event/%d/participants?start=%d&count=100";
         //String url = "https://api.douban.com/v2/event/%d/participants";
         return String.format(url,identity,start);
  }
+}
+
 ```
 
 每次最多只返回100条数据，如果事件的参见人数超过100，要改变start值。获得参加者id后，将其存放到队列中。
 
 ```java
-do{
+public class DoubanEventDownloader extends AbstractDownloader {
+/**
+     *
+     * @return event information + "\n" + event participants in json format
+     * if any of the three request fails, then the result is empty string
+     * if result is empty, means that it failed to fetch content
+     */
+    @Override
+    public String download() {
+        ....
+        do{
                 String participantURL = getParticipantsUrl(start);
                 start +=count;
                 String participantJsonData = downloadJsonWithProxy(participantURL);
@@ -279,6 +296,10 @@ do{
 
             }while (more == true);
             userQueue.addAll(participantsSet);
+        ...
+    }
+}
+
 ```
 
 返回的Json中会告诉参加人数的个数，做如下解析：
@@ -310,6 +331,90 @@ public class DoubanJsonparser {
 
 具体下载代码如下，如果下载过程中出现异常，将会丢弃下载到的数据，返回空字符串。`DataSaver`类遇到字符串时，不会讲结果写入。
 
+```java
+public class DoubanEventDownloader extends AbstractDownloader {
+/**
+     *
+     * @return event information + "\n" + event participants in json format
+     * if any of the three request fails, then the result is empty string
+     * if result is empty, means that it failed to fetch content
+     */
+    @Override
+    public String download() {
+        StringBuilder builder = new StringBuilder();
+        try{
+            visitedEvent.put(identity,true);
+
+            String eventURL = getEventUrl();
+            int start,count = 100;
+
+
+            Set<Integer> participantsSet = new HashSet<>();
+            start = 0;
+            boolean more ;
+            do{
+                String participantURL = getParticipantsUrl(start);
+                start +=count;
+                String participantJsonData = downloadJsonWithProxy(participantURL);
+                 more = DoubanJsonparser
+                        .getParticipantsIdThroughEventJson(participantJsonData,participantsSet,start);
+
+            }while (more == true);
+            userQueue.addAll(participantsSet);
+
+
+            start = 0;
+            Set<Integer> wishersSet = new HashSet<>();
+            do{
+                String wisherURL = getWishersUrl(start);
+                start += count;
+
+                String wisherJsonData = downloadJsonWithProxy(wisherURL);
+                more = DoubanJsonparser
+                        .getParticipantsIdThroughEventJson(wisherJsonData,wishersSet,start);
+
+            }while (more == true);
+            userQueue.addAll(wishersSet);
+
+
+
+            String eventJsonData = downloadJsonWithProxy(eventURL);
+            Gson gson = new Gson();
+            JsonObject eventObject  = gson.fromJson(eventJsonData, JsonObject.class);
+            JsonElement idElement = gson.toJsonTree(identity,
+                    new TypeToken<Integer>(){}.getType());
+            eventObject.add("eventId",idElement);
+
+            List<Integer> userList = participantsSet.stream().collect(Collectors.toList());
+            JsonElement userElement = gson.toJsonTree(userList,
+                    new TypeToken<List<Integer>>(){}.getType());
+            eventObject.add("participants",userElement);
+
+            List<Integer> wishersList = wishersSet.stream().collect(Collectors.toList());
+            JsonElement wishersElement = gson.toJsonTree(wishersList,
+                    new TypeToken<List<Integer>>(){}.getType());
+            eventObject.add("wishers",wishersElement);
+
+            eventObject.remove("image");
+            eventObject.remove("owner");
+            eventObject.remove("alt");
+
+           
+            builder.append(eventObject)
+           
+        }catch (IOException | NumberFormatException e){
+            e.printStackTrace();
+            System.err.println("event:"+identity);
+            builder = new StringBuilder();
+        }
+        return builder.toString();
+    }
+    ...
+}
+```
+
+
+
 #### 用户 ----> 事件
 
 根据以下API获取用户参加和感兴趣的事件，提取事件id，存放到事件队列中。
@@ -321,11 +426,14 @@ https://api.douban.com/v2/event/user_participated/%d?start=0&count=100"
 java 代码
 
 ```java
- public String getParticipantsEventUrl(int start){
+public class DoubanUserDownloader extends AbstractDownloader {
+
+public String getParticipantsEventUrl(int start){
         String url = "https://api.douban.com/v2/event/user_participated/%d?start=%d&count=50";
         //String url = "https://api.douban.com/v2/event/user_participated/%d";
         return String.format(url,identity,start);
     }
+}
 ```
 
 
@@ -337,7 +445,7 @@ java 代码
 java代码如下，当事件队列和用户队列都为空时，程序结束。
 
 ```java
-
+public class DoubanBFSDownload {
     public void beginDownload(){
         List<Future<String>> result = new LinkedList<>();
 
@@ -377,9 +485,35 @@ java代码如下，当事件队列和用户队列都为空时，程序结束。
         }
         executorService.shutdown();
     }
+   ....
+}
 ```
 
-因为程序可能随机
+因为程序可能随机停止和启动，所以每次下载时都要讲seed中的数据和已经下载的数据进行去重。
+
+```java
+public class DoubanBFSDownload {
+     public void setup(){
+        Set<Integer> eventSeedIdList = SeedManagerUtil.loadSeeds(eventSeedPath).stream().collect(Collectors.toSet());
+        Set<Integer> visitedEventList = getVisitedData(eventDataPath,"id").stream().collect(Collectors.toSet());
+        eventSeedIdList.removeAll(visitedEventList);
+        eventQueue.addAll(eventSeedIdList);
+
+        Set<Integer> userSeedIdList = SeedManagerUtil.loadSeeds(userSeedPath).stream().collect(Collectors.toSet());
+        Set<Integer> visitedUserList = getVisitedData(userDataPath,"userId").stream().collect(Collectors.toSet());
+        userSeedIdList.removeAll(visitedUserList);
+        userQueue.addAll(userSeedIdList);
+
+        System.out.println("event size;"+eventQueue.size());
+        System.out.println("user size:"+userQueue.size());
+    }
+    ....
+}
+```
+
+# 程序运行
+
+见每个包的测试代码。
 
 ## 豆瓣同城API文档
 
