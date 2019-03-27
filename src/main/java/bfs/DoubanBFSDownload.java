@@ -39,12 +39,21 @@ public class DoubanBFSDownload {
     private ConcurrentLinkedQueue<Integer> userQueue;
 
     public DoubanBFSDownload() {
+        eventSet = new ConcurrentHashMap<>();
+        userSet = new ConcurrentHashMap<>();
+        eventQueue = new ConcurrentLinkedQueue<>();
+        userQueue = new ConcurrentLinkedQueue<>();
         executorService = Executors.newFixedThreadPool(numThread);
+
     }
 
     public DoubanBFSDownload(int numThread) {
         this.numThread = numThread;
         executorService = Executors.newFixedThreadPool(numThread);
+        eventSet = new ConcurrentHashMap<>();
+        userSet = new ConcurrentHashMap<>();
+        eventQueue = new ConcurrentLinkedQueue<>();
+        userQueue = new ConcurrentLinkedQueue<>();
     }
 
     public DoubanBFSDownload(int numThread,
@@ -87,8 +96,10 @@ public class DoubanBFSDownload {
         Set<Integer> visitedEventIdSet = getVisitedData(eventDataPath,"id").stream().collect(Collectors.toSet());
         Set<Integer> visitedUserIdSet = getVisitedData(userDataPath,"userId").stream().collect(Collectors.toSet());
 
-        Set<Integer> seedEventIdSet = getSeedData(eventDataPath,"participants","wishers").stream().collect(Collectors.toSet());
-        Set<Integer> seedUserIdSet  = getSeedData(userDataPath,"userEvents","wishEvents").stream().collect(Collectors.toSet());
+        //get seed user from eventsJson.txt
+        Set<Integer> seedUserIdSet = getSeedData(eventDataPath,"participants","wishers").stream().collect(Collectors.toSet());
+        //get seed event from usersJson.txt
+        Set<Integer> seedEventIdSet  = getSeedData(userDataPath,"userEvents","wishEvents").stream().collect(Collectors.toSet());
 
         seedEventIdSet.removeAll(visitedEventIdSet);
         seedUserIdSet.removeAll(visitedUserIdSet);

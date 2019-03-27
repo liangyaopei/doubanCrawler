@@ -32,7 +32,8 @@ public class DoubanBFSDownloadTest {
         DoubanBFSDownload download = new DoubanBFSDownload(numThread,eventSeedPath,
                 userSeedPath,eventDataPath,userDataPath,
                 eventNewSeedPath,userNewSeedPath);
-        download.setup();
+      //  download.setup();
+        download.repeatDownloadSetup();
         download.beginDownload();
 
     }
@@ -48,9 +49,11 @@ public class DoubanBFSDownloadTest {
     public void getSeedDataTest(){
          String eventDataPath = "./douban/data/eventsJson.txt";
          String userDataPath = "./douban/data/usersJson.txt";
-        Set<Integer> seedEventIdSet = DoubanBFSDownload
-                .getSeedData(eventDataPath,"participants","wishers").stream().collect(Collectors.toSet());
-        System.out.println("seed user size:"+seedEventIdSet.size());
+     //    Set<Integer> seedEventIdSet = DoubanBFSDownload
+      //          .getSeedData(eventDataPath,"participants","wishers").stream().collect(Collectors.toSet());
+         DoubanBFSDownload doubanBFSDownload = new DoubanBFSDownload();
+         doubanBFSDownload.repeatDownloadSetup();
+      //  System.out.println("seed user size:"+seedEventIdSet.size());
 
     }
 }

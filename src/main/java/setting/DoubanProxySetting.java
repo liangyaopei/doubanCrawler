@@ -30,6 +30,7 @@ public class DoubanProxySetting {
     private static class ProxyHolder{
         private static Proxy holder;
         static {
+            System.setProperty("jdk.http.auth.tunneling.disabledSchemes", "");
             Authenticator.setDefault(new Authenticator() {
                 public PasswordAuthentication getPasswordAuthentication()
                 {
