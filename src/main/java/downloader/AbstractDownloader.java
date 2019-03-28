@@ -16,6 +16,7 @@ public abstract class AbstractDownloader implements Callable<String> {
     protected ConcurrentLinkedQueue<Integer> userQueue;
     protected ConcurrentHashMap<Integer,Boolean> visitedEvent;
     protected ConcurrentHashMap<Integer,Boolean> visitedUser;
+    protected int timeout = 10_000;
 
     public AbstractDownloader(Integer identity,
                               ConcurrentLinkedQueue<Integer> eventQueue, ConcurrentLinkedQueue<Integer> userQueue,
@@ -29,7 +30,7 @@ public abstract class AbstractDownloader implements Callable<String> {
 
     public String downloadJsonWithProxy(String url) throws IOException {
         String data = Jsoup.connect(url)
-                .timeout(8000)
+                .timeout(timeout)
                 .header(DoubanProxySetting.ProxyHeadKey,DoubanProxySetting.ProxyHeadVal)
                 .proxy(DoubanProxySetting.getProxy())
                 .ignoreContentType(true)
