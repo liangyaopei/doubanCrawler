@@ -30,7 +30,7 @@ public class DoubanBFSDownload {
     private String userDataPath = "./douban/data/usersJson.txt";
     private String eventNewSeedPath = "./douban/seed/events1.txt";
     private String userNewSeedPath = "./douban/seed/users1.txt";
-    private int numThread = 3;
+    private int numThread = 4;
     private ExecutorService executorService;
 
     private ConcurrentHashMap<Integer,Boolean> eventSet;
