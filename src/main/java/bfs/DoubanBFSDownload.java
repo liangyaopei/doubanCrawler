@@ -93,6 +93,7 @@ public class DoubanBFSDownload {
     }
 
     public void repeatDownloadSetup(){
+        System.out.println("Running repeated downloading");
         Set<Integer> visitedEventIdSet = getVisitedData(eventDataPath,"id").stream().collect(Collectors.toSet());
         Set<Integer> visitedUserIdSet = getVisitedData(userDataPath,"userId").stream().collect(Collectors.toSet());
 
