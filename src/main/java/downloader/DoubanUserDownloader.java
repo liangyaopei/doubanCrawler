@@ -50,6 +50,8 @@ public class DoubanUserDownloader extends AbstractDownloader {
 
         try{
             visitedUser.put(identity,true);
+            //old version of visited event
+            Set<Integer> visitedEventSet = visitedEvent.keySet();
 
             int start,count =100;
             boolean more;
@@ -62,6 +64,7 @@ public class DoubanUserDownloader extends AbstractDownloader {
                 more = DoubanJsonparser
                         .getEventIdThroughParticipantsJson(eventJsonData,userEventSet,start);
             }while (more == true);
+            userEventSet.removeAll(visitedEventSet);
             eventQueue.addAll(userEventSet);
 
             start = 0;
@@ -73,6 +76,7 @@ public class DoubanUserDownloader extends AbstractDownloader {
                 more = DoubanJsonparser
                         .getEventIdThroughParticipantsJson(eventJsonData,wishersEventSet,start);
             }while (more == true);
+            wishersEventSet.removeAll(visitedEventSet);
             eventQueue.addAll(wishersEventSet);
 
 
