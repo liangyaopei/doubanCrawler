@@ -28,8 +28,7 @@ public class DoubanBFSDownload {
     private String userSeedPath = "./douban/seed/users.txt";
     private String eventDataPath = "./douban/data/eventsJson.txt";
     private String userDataPath = "./douban/data/usersJson.txt";
-    private String eventNewSeedPath = "./douban/seed/events1.txt";
-    private String userNewSeedPath = "./douban/seed/users1.txt";
+
     private int numThread = 4;
     private ExecutorService executorService;
 
@@ -58,15 +57,12 @@ public class DoubanBFSDownload {
 
     public DoubanBFSDownload(int numThread,
                              String eventSeedPath, String userSeedPath,
-                             String eventDataPath, String userDataPath,
-                             String eventNewSeedPath, String userNewSeedPath) {
+                             String eventDataPath, String userDataPath) {
         this.numThread = numThread;
         this.eventSeedPath = eventSeedPath;
         this.userSeedPath = userSeedPath;
         this.eventDataPath = eventDataPath;
         this.userDataPath = userDataPath;
-        this.eventNewSeedPath = eventNewSeedPath;
-        this.userNewSeedPath = userNewSeedPath;
 
 
         eventSet = new ConcurrentHashMap<>();
@@ -97,10 +93,14 @@ public class DoubanBFSDownload {
         Set<Integer> visitedEventIdSet = getVisitedData(eventDataPath,"id").stream().collect(Collectors.toSet());
         Set<Integer> visitedUserIdSet = getVisitedData(userDataPath,"userId").stream().collect(Collectors.toSet());
 
-        //get seed user from eventsJson.txt
-        Set<Integer> seedUserIdSet = getSeedData(eventDataPath,"participants","wishers").stream().collect(Collectors.toSet());
         //get seed event from usersJson.txt
-        Set<Integer> seedEventIdSet  = getSeedData(userDataPath,"userEvents","wishEvents").stream().collect(Collectors.toSet());
+        Set<Integer> seedEventIdSet  =
+                getSeedData(userDataPath,"userEvents","wishEvents")
+                        .stream().collect(Collectors.toSet());
+        //get seed user from eventsJson.txt
+        Set<Integer> seedUserIdSet =
+                getSeedData(eventDataPath,"participants","wishers")
+                        .stream().collect(Collectors.toSet());
 
         seedEventIdSet.removeAll(visitedEventIdSet);
         seedUserIdSet.removeAll(visitedUserIdSet);
@@ -108,10 +108,47 @@ public class DoubanBFSDownload {
         eventQueue.addAll(seedEventIdSet);
         userQueue.addAll(seedUserIdSet);
 
-        System.out.println("event size;"+eventQueue.size());
-        System.out.println("user size:"+userQueue.size());
+        System.out.println("size of events to be downloaded"+eventQueue.size());
+        System.out.println("size of users to be downloaded "+userQueue.size());
     }
 
+    /**
+     * This method is an improved version of beginDownload
+     * it is more memory friendly
+     */
+    public void bfsDownlaod(){
+        List<Future<String>> result = new LinkedList<>();
+        int downoadEachtime = 10;
+
+        while (eventQueue.isEmpty()==false && userQueue.isEmpty()){
+            for(int count=0; eventQueue.isEmpty()== false && count<downoadEachtime;count++){
+                Integer eventId = eventQueue.poll();
+                DoubanEventDownloader eventDownloader = new DoubanEventDownloader(eventId,
+                        eventQueue,userQueue,eventSet,userSet);
+                Future<String> task = executorService.submit(eventDownloader);
+                result.add(task);
+            }
+            DataSaver.saveData(result,eventDataPath);
+
+            for(int count=0; userQueue.isEmpty()==false && count<downoadEachtime;count++){
+                Integer userId = userQueue.poll();
+                DoubanUserDownloader userDownloader = new DoubanUserDownloader(userId,
+                        eventQueue,userQueue,eventSet,userSet);
+                Future<String> task = executorService.submit(userDownloader);
+                result.add(task);
+            }
+            DataSaver.saveData(result,userDataPath);
+        }
+
+    }
+
+    /**
+     * When the eventQueue or userQueue is too large, this may cause that
+     * eventQueue(userQueue) occupies all the execution(12 hours in practise)
+     * and at the same time, the other queue cannot be executed
+     * So use bfsDownload may be better
+     */
+    @Deprecated
     public void beginDownload(){
         List<Future<String>> result = new LinkedList<>();
 
@@ -127,8 +164,6 @@ public class DoubanBFSDownload {
             }
             DataSaver.saveData(result,eventDataPath);
             System.out.println("Now,event queue is empty");
-            //保存将要访问的用户id
-            SeedManagerUtil.storeSeed(userQueue.stream().distinct().sorted().collect(Collectors.toList()), userNewSeedPath);
 
             while (!userQueue.isEmpty()){
                 Integer userId = userQueue.poll();
@@ -143,9 +178,6 @@ public class DoubanBFSDownload {
 
             DataSaver.saveData(result,userDataPath);
             System.out.println("Now,user queue is empty");
-            //保存将要访问的事件id
-            SeedManagerUtil.storeSeed(eventQueue.stream().distinct().sorted().collect(Collectors.toList()), eventNewSeedPath);
-
 
             if(eventQueue.isEmpty() && userQueue.isEmpty()){
                 break;

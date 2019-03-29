@@ -125,8 +125,14 @@ public class DoubanEventDownloader extends AbstractDownloader {
             */
 
         }catch (IOException | NumberFormatException e){
-            e.printStackTrace();
-            System.err.println("event:"+identity);
+            StringBuilder exceptionMsg = new StringBuilder();
+            exceptionMsg
+                    .append("event:")
+                    .append(identity)
+                    .append(e.getClass().getName());
+            System.err.println(exceptionMsg);
+
+            //Make result empty
             builder = new StringBuilder();
         }
         return builder.toString();

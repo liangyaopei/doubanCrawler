@@ -30,8 +30,7 @@ public class DoubanBFSDownloadTest {
        // DataSaver.saveData(null,outputPath);
 
         DoubanBFSDownload download = new DoubanBFSDownload(numThread,eventSeedPath,
-                userSeedPath,eventDataPath,userDataPath,
-                eventNewSeedPath,userNewSeedPath);
+                userSeedPath,eventDataPath,userDataPath);
       //  download.setup();
         download.repeatDownloadSetup();
         download.beginDownload();

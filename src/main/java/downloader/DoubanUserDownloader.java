@@ -97,8 +97,13 @@ public class DoubanUserDownloader extends AbstractDownloader {
                     .append("\n");
 
         }catch (IOException | NumberFormatException e){
-            e.printStackTrace();
-            System.err.println("user:"+identity);
+            StringBuilder exceptionMsg = new StringBuilder();
+            exceptionMsg
+                    .append("user:")
+                    .append(identity)
+                    .append(e.getClass().getName());
+            System.err.println(exceptionMsg);
+            //Make result empty
             builder = new StringBuilder();
         }
 
