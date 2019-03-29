@@ -114,6 +114,9 @@ public class DoubanBFSDownload {
         seedUserIdSet.removeAll(invalidUserIdSet);
 
 
+        System.out.println("size of invalid events:"+invalidEventIdSet.size());
+        System.out.println("size of invalid users: "+invalidUserIdSet.size());
+
         eventQueue.addAll(seedEventIdSet);
         userQueue.addAll(seedUserIdSet);
 
