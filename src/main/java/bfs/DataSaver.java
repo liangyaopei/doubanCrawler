@@ -35,7 +35,7 @@ public class DataSaver {
                     if(data.isEmpty()==false){
                         writer.write(data);
                         writer.flush();
-                        System.out.println(Thread.currentThread().getName()+" saving data ");
+                        System.out.println(Thread.currentThread().getName()+":"+path+". saving data ");
                     }
                    // Thread.sleep(300);
                 }catch (InterruptedException | ExecutionException e){

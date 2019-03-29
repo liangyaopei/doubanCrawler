@@ -26,8 +26,9 @@ public class DoubanBFSDownload {
 
     private String eventSeedPath = "./douban/seed/events.txt";
     private String userSeedPath = "./douban/seed/users.txt";
-    private String eventDataPath = "./douban/data/eventsJson.txt";
-    private String userDataPath = "./douban/data/usersJson.txt";
+    private String eventDataPath = "./douban/eventsJson.txt";
+    private String userDataPath = "./douban/usersJson.txt";
+    private String invalidDataPath = "./douban/invalid.txt";
 
     private int numThread = 4;
     private ExecutorService executorService;
@@ -57,13 +58,14 @@ public class DoubanBFSDownload {
 
     public DoubanBFSDownload(int numThread,
                              String eventSeedPath, String userSeedPath,
-                             String eventDataPath, String userDataPath) {
+                             String eventDataPath, String userDataPath,
+                             String invalidDataPath) {
         this.numThread = numThread;
         this.eventSeedPath = eventSeedPath;
         this.userSeedPath = userSeedPath;
         this.eventDataPath = eventDataPath;
         this.userDataPath = userDataPath;
-
+        this.invalidDataPath = invalidDataPath;
 
         eventSet = new ConcurrentHashMap<>();
         userSet = new ConcurrentHashMap<>();
@@ -105,11 +107,18 @@ public class DoubanBFSDownload {
         seedEventIdSet.removeAll(visitedEventIdSet);
         seedUserIdSet.removeAll(visitedUserIdSet);
 
+        Set<Integer> invalidEventIdSet = getInvalidData(invalidDataPath,"event:");
+        seedEventIdSet.removeAll(invalidEventIdSet);
+
+        Set<Integer> invalidUserIdSet = getInvalidData(invalidDataPath,"user:");
+        seedUserIdSet.removeAll(invalidUserIdSet);
+
+
         eventQueue.addAll(seedEventIdSet);
         userQueue.addAll(seedUserIdSet);
 
-        System.out.println("size of events to be downloaded"+eventQueue.size());
-        System.out.println("size of users to be downloaded "+userQueue.size());
+        System.out.println("size of events to be downloaded: "+eventQueue.size());
+        System.out.println("size of users to be downloaded: "+userQueue.size());
     }
 
     /**
@@ -120,7 +129,7 @@ public class DoubanBFSDownload {
         List<Future<String>> result = new LinkedList<>();
         int downoadEachtime = 10;
 
-        while (eventQueue.isEmpty()==false && userQueue.isEmpty()){
+        while (eventQueue.isEmpty()==false && userQueue.isEmpty() == false){
             for(int count=0; eventQueue.isEmpty()== false && count<downoadEachtime;count++){
                 Integer eventId = eventQueue.poll();
                 DoubanEventDownloader eventDownloader = new DoubanEventDownloader(eventId,
@@ -197,6 +206,21 @@ public class DoubanBFSDownload {
             )
                     .distinct().sorted().collect(Collectors.toList());
 
+        }catch (IOException e){
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+    public static Set<Integer> getInvalidData(String path,String keyword){
+        Set<Integer> result = new HashSet<>();
+        try{
+            result = Files.lines(Paths.get(path))
+                    .filter(line -> line.startsWith(keyword))
+                    .map(line -> Integer.parseInt(
+                            line.substring(line.indexOf(":")+1)
+                    ))
+                    .collect(Collectors.toSet());
         }catch (IOException e){
             e.printStackTrace();
         }

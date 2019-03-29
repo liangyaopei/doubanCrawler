@@ -45,7 +45,7 @@
           <configuration>
             <archive>
               <manifest>
-                <mainClass>application.Main</mainClass>
+                <mainClass>application.BFSMain</mainClass>
               </manifest>
             </archive>
             <descriptorRefs>

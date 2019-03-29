@@ -101,6 +101,7 @@ public class DoubanUserDownloader extends AbstractDownloader {
             exceptionMsg
                     .append("user:")
                     .append(identity)
+                    .append("\n")
                     .append(e.getClass().getName());
             System.err.println(exceptionMsg);
             //Make result empty

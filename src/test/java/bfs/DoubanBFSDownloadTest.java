@@ -13,10 +13,9 @@ public class DoubanBFSDownloadTest {
 
     private String eventSeedPath = "./douban/seed/events.txt";
     private String userSeedPath = "./douban/seed/users.txt";
-    private String eventDataPath = "./douban/data/eventsJson.txt";
-    private String userDataPath = "./douban/data/usersJson.txt";
-    private String eventNewSeedPath = "./douban/seed/events1.txt";
-    private String userNewSeedPath = "./douban/seed/users1.txt";
+    private String eventDataPath = "./douban/eventsJson.txt";
+    private String userDataPath = "./douban/usersJson.txt";
+    private String invalidDataPath = "./douban/invalid.txt";
 
     /**
      * 4 thread is good for my PC after testing
@@ -30,11 +29,11 @@ public class DoubanBFSDownloadTest {
        // DataSaver.saveData(null,outputPath);
 
         DoubanBFSDownload download = new DoubanBFSDownload(numThread,eventSeedPath,
-                userSeedPath,eventDataPath,userDataPath);
+                userSeedPath,eventDataPath,userDataPath,invalidDataPath);
       //  download.setup();
         download.repeatDownloadSetup();
-        download.beginDownload();
-
+        //download.beginDownload();
+        download.bfsDownlaod();
     }
 
     @Test
@@ -46,8 +45,8 @@ public class DoubanBFSDownloadTest {
 
     @Test
     public void getSeedDataTest(){
-         String eventDataPath = "./douban/data/eventsJson.txt";
-         String userDataPath = "./douban/data/usersJson.txt";
+         String eventDataPath = "./douban/eventsJson.txt";
+         String userDataPath = "./douban/usersJson.txt";
      //    Set<Integer> seedEventIdSet = DoubanBFSDownload
       //          .getSeedData(eventDataPath,"participants","wishers").stream().collect(Collectors.toSet());
          DoubanBFSDownload doubanBFSDownload = new DoubanBFSDownload();

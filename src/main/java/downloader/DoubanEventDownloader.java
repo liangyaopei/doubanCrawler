@@ -129,6 +129,7 @@ public class DoubanEventDownloader extends AbstractDownloader {
             exceptionMsg
                     .append("event:")
                     .append(identity)
+                    .append("\n")
                     .append(e.getClass().getName());
             System.err.println(exceptionMsg);
 
