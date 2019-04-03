@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.*;
@@ -26,8 +27,8 @@ public class DoubanBFSDownload {
 
     private String eventSeedPath = "./douban/seed/events.txt";
     private String userSeedPath = "./douban/seed/users.txt";
-    private String eventDataPath = "./douban/eventsJson.txt";
-    private String userDataPath = "./douban/usersJson.txt";
+    private String eventDataPath = "./douban/events";
+    private String userDataPath = "./douban/users";
     private String invalidDataPath = "./douban/invalid.txt";
 
     private int numThread = 4;
@@ -140,7 +141,7 @@ public class DoubanBFSDownload {
                 Future<String> task = executorService.submit(eventDownloader);
                 result.add(task);
             }
-            DataSaver.saveData(result,eventDataPath);
+            DataSaver.saveData(result,eventDataPath,invalidDataPath);
 
             for(int count=0; userQueue.isEmpty()==false && count<downoadEachtime;count++){
                 Integer userId = userQueue.poll();
@@ -149,7 +150,7 @@ public class DoubanBFSDownload {
                 Future<String> task = executorService.submit(userDownloader);
                 result.add(task);
             }
-            DataSaver.saveData(result,userDataPath);
+            DataSaver.saveData(result,userDataPath,invalidDataPath);
         }
 
     }
@@ -174,7 +175,7 @@ public class DoubanBFSDownload {
                     result.add(task);
                 }
             }
-            DataSaver.saveData(result,eventDataPath);
+            DataSaver.saveData(result,eventDataPath,invalidDataPath);
             System.out.println("Now,event queue is empty");
 
             while (!userQueue.isEmpty()){
@@ -188,7 +189,7 @@ public class DoubanBFSDownload {
                 }
             }
 
-            DataSaver.saveData(result,userDataPath);
+            DataSaver.saveData(result,userDataPath,invalidDataPath);
             System.out.println("Now,user queue is empty");
 
             if(eventQueue.isEmpty() && userQueue.isEmpty()){
@@ -200,18 +201,26 @@ public class DoubanBFSDownload {
 
     public static List<Integer> getVisitedData(String path,String memberName){
         List<Integer> result = new ArrayList<>();
-        try(Stream<String> lines = Files.lines(Paths.get(path))){
-            JsonParser jsonParser = new JsonParser();
-            result = lines.map(line ->
+        try{
+            List<Path> pathList = Files.list(Paths.get(path)).collect(Collectors.toList());
+            for(Path filePath: pathList){
+                try(Stream<String> lines = Files.lines(filePath)){
+                    JsonParser jsonParser = new JsonParser();
+                    result = lines.map(line ->
 
-                        jsonParser.parse(line).getAsJsonObject().get(memberName).getAsInt()
+                            jsonParser.parse(line).getAsJsonObject().get(memberName).getAsInt()
 
-            )
-                    .distinct().sorted().collect(Collectors.toList());
+                    )
+                            .distinct().sorted().collect(Collectors.toList());
 
+                }catch (IOException e){
+                    e.printStackTrace();
+                }
+            }
         }catch (IOException e){
             e.printStackTrace();
         }
+
         return result;
     }
 
@@ -232,24 +241,31 @@ public class DoubanBFSDownload {
 
     public static List<Integer> getSeedData(String path,String memberName1,String memberName2){
         List<Integer> result = new ArrayList<>();
-        try(Stream<String> lines = Files.lines(Paths.get(path),StandardCharsets.UTF_8)){
-            JsonParser jsonParser = new JsonParser();
-            Gson gson = new Gson();
-            result = lines
-                    .map(line -> {
-                        JsonObject jsonObject = jsonParser.parse(line).getAsJsonObject();
-                        Type listType = new TypeToken<List<Integer>>(){}.getType();
-                        JsonElement jsonElement1 = jsonObject.get(memberName1);
-                        List<Integer> list1 = gson.fromJson(jsonElement1,listType);
+        try{
+            List<Path> pathList = Files.list(Paths.get(path)).collect(Collectors.toList());
+            for(Path filePath:pathList){
+                try(Stream<String> lines = Files.lines(filePath,StandardCharsets.UTF_8)){
+                    JsonParser jsonParser = new JsonParser();
+                    Gson gson = new Gson();
+                    result = lines
+                            .map(line -> {
+                                JsonObject jsonObject = jsonParser.parse(line).getAsJsonObject();
+                                Type listType = new TypeToken<List<Integer>>(){}.getType();
+                                JsonElement jsonElement1 = jsonObject.get(memberName1);
+                                List<Integer> list1 = gson.fromJson(jsonElement1,listType);
 
-                        JsonElement jsonElement2 = jsonObject.get(memberName2);
-                        List<Integer> list2 = gson.fromJson(jsonElement2,listType);
-                        list2.addAll(list1);
-                        return list2;
-                    })
-                    .flatMap(list -> list.stream())
-                    .distinct()
-                    .collect(Collectors.toList());
+                                JsonElement jsonElement2 = jsonObject.get(memberName2);
+                                List<Integer> list2 = gson.fromJson(jsonElement2,listType);
+                                list2.addAll(list1);
+                                return list2;
+                            })
+                            .flatMap(list -> list.stream())
+                            .distinct()
+                            .collect(Collectors.toList());
+                }catch (IOException e){
+                    e.printStackTrace();
+                }
+            }
         }catch (IOException e){
             e.printStackTrace();
         }

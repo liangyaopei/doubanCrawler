@@ -106,10 +106,11 @@ public class DoubanUserDownloader extends AbstractDownloader {
                     .append("user:")
                     .append(identity)
                     .append("\n")
-                    .append(e.getClass().getName());
+                    .append(e.getClass().getName())
+                    .append("\n");
             System.err.println(exceptionMsg);
             //Make result empty
-            builder = new StringBuilder();
+            builder = new StringBuilder().append(exceptionMsg);
         }
 
         return builder.toString();
