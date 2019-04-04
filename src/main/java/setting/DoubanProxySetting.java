@@ -14,8 +14,8 @@ import org.jsoup.nodes.Document;
 
 public class DoubanProxySetting {
     // 代理隧道验证信息
-    public final static String ProxyUser = "H5279STO3632B73D";
-    public final static String ProxyPass = "18F9C7F87365067E";
+    public final static String ProxyUser = "H9CLABM47OJDP09D";
+    public final static String ProxyPass = "F3A2279D49EDA0DA";
 
     // 代理服务器
     public final static String ProxyHost = "http-dyn.abuyun.com";

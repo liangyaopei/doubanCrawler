@@ -38,8 +38,10 @@ public class DataSaver {
                     Future<String> task = iterator.next();
                     String data = task.get();
                     if(data.startsWith("event:") || data.startsWith("user:")){
-                        errWriter.write(data);
-                        System.out.println(Thread.currentThread().getName()+":"+errPath+"writing invalid data");
+                        if(data.contains("timeout") == false){
+                            errWriter.write(data);
+                            System.out.println(Thread.currentThread().getName()+":"+errPath+"writing invalid data");
+                        }
                     }else {
                         writer.write(data);
                         writer.flush();
